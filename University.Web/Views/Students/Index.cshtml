@@ -1,4 +1,5 @@
-﻿@model List<University.Web.Models.Student>
+﻿@using PagedList.Mvc
+@model PagedList.IPagedList<University.BL.DTOs.StudentDTO>
 
 
 @{
@@ -7,6 +8,21 @@
 
 <h2>Bienvenidos al Index</h2>
 
+@Html.ActionLink("New", "Create", "Students", null, new { @class = "btn btn-dark" })
+<hr />
+
+@using (Html.BeginForm("Index", "Students", FormMethod.Get))
+{
+    <p>
+        <select name="PageSize" id="pageSize" class="form-control">
+            <option @if ((int)ViewBag.PageSize == 10) { @Html.Raw("selected") }>10</option>
+            <option @if ((int)ViewBag.PageSize == 15) { @Html.Raw("selected") }>15</option>
+        </select>
+        <br />
+        <input type="submit" value="apply" class="btn btn-sn btn-success" />
+    </p>
+
+}
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -14,6 +30,7 @@
             <th>Last Name</th>
             <th>First MidName</th>
             <th>Enrollment Date</th>
+            <th>Options </th>
         </tr>
     </thead>
     <tbody>
@@ -25,18 +42,56 @@
                 <td>@item.LastName</td>
                 <td>@item.FirstMidName</td>
                 <td>@item.EnrollmentDate</td>
+                <td>
+                    @Html.ActionLink("Courses", "Index", "Students", new { studentId = item.ID }, new { @class = "btn btn-dark" })
+                    @Html.ActionLink("Edit", "Edit", "Students", new { id = item.ID }, new { @class = "btn btn-success" })
+                    @Html.ActionLink("Delete", "Delete", "Students", new { id = item.ID }, new { @class = "btn btn-dark" })
+
             </tr>
 
         }
 
     </tbody>
 </table>
+<br />
+
+Page @(Model.PageCount < Model.PageNumber ? 0 :Model.PageNumber) of @Model.PageCount
+<br />
+Total Item Count @Model.TotalItemCount
+@Html.PagedListPager(Model, page => Url.Action("index", "Students", new { page, pageSize = ViewBag.PageSize }))
+
 
 @if (ViewBag.Data != null && ViewBag.Message != null)
 {
-<ul>
-    <li>@ViewBag.Data</li>
-    <li>@ViewBag.message</li>
+    <ul>
+        <li>@ViewBag.Data</li>
+        <li>@ViewBag.message</li>
     </ul>
 }
 
+@if (ViewBag.Courses != null)
+{
+    <h1></h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Credits</th>
+
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in (List<University.BL.DTOs.CourseDTO>)ViewBag.Courses)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Credits</td>
+                </tr>
+
+            }
+
+        </tbody>
+    </table>
+
+}
